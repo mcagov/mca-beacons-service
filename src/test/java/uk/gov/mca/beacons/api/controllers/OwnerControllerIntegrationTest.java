@@ -1,7 +1,12 @@
 package uk.gov.mca.beacons.api.controllers;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Objects;
+import java.util.UUID;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
@@ -18,21 +23,17 @@ class OwnerControllerIntegrationTest {
   private WebTestClient webTestClient;
 
   @Test
-  void shouldCreateTheOwner() throws Exception {
-    final String createOwnerRequest = new String(
-      Files.readAllBytes(
-        Paths.get("src/test/resources/fixtures/createOwnerRequest.json")
-      )
+  void aNewValidOwnerPostRequest_ShouldCreateTheOwner() throws Exception {
+    final String createOwnerRequest = readFile(
+      "src/test/resources/fixtures/createOwnerRequest.json"
     );
-    final String createOwnerResponse = new String(
-      Files.readAllBytes(
-        Paths.get("src/test/resources/fixtures/createOwnerResponse.json")
-      )
+    final String createOwnerResponse = readFile(
+      "src/test/resources/fixtures/createOwnerResponse.json"
     );
 
     webTestClient
       .post()
-      .uri("/owner")
+      .uri("/owners")
       .bodyValue(createOwnerRequest)
       .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
       .exchange()
@@ -49,26 +50,18 @@ class OwnerControllerIntegrationTest {
   }
 
   @Test
-  void shouldCreateTheOwnerWithCreatedDatesAndLastModifiedDates()
+  void aNewValidOwnerPostRequest_shouldCreateTheOwnerWithCreatedDatesAndLastModifiedDates()
     throws Exception {
-    final String createOwnerRequest = new String(
-      Files.readAllBytes(
-        Paths.get(
-          "src/test/resources/fixtures/createOwnerRequestWithDatesSpecified.json"
-        )
-      )
+    final String createOwnerRequest = readFile(
+      "src/test/resources/fixtures/createOwnerRequestWithDatesSpecified.json"
     );
-    final String createOwnerResponse = new String(
-      Files.readAllBytes(
-        Paths.get(
-          "src/test/resources/fixtures/createOwnerResponseWithDatesSpecified.json"
-        )
-      )
+    final String createOwnerResponse = readFile(
+      "src/test/resources/fixtures/createOwnerResponseWithDatesSpecified.json"
     );
 
     webTestClient
       .post()
-      .uri("/owner")
+      .uri("/owners")
       .bodyValue(createOwnerRequest)
       .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
       .exchange()
@@ -78,5 +71,55 @@ class OwnerControllerIntegrationTest {
       .json(createOwnerResponse)
       .jsonPath("$.data.id")
       .isNotEmpty();
+  }
+
+  @Test
+  void aGetRequestWithExistingId_shouldRespondWithExistingOwner()
+    throws Exception {
+    final var createdOwnerId = createNewOwner(
+      readFile("src/test/resources/fixtures/createOwnerRequest.json")
+    );
+    final String existingOwnerResponse = readFile(
+      "src/test/resources/fixtures/createOwnerResponse.json"
+    );
+
+    webTestClient
+      .get()
+      .uri("/owners/" + createdOwnerId)
+      .exchange()
+      .expectStatus()
+      .isOk()
+      .expectBody()
+      .json(existingOwnerResponse)
+      .jsonPath("$.data.id", createdOwnerId);
+  }
+
+  private UUID createNewOwner(String request) throws JSONException {
+    return UUID.fromString(
+      new JSONObject(
+        new String(
+          Objects.requireNonNull(
+            webTestClient
+              .post()
+              .uri("/owners")
+              .bodyValue(request)
+              .header(
+                HttpHeaders.CONTENT_TYPE,
+                MediaType.APPLICATION_JSON_VALUE
+              )
+              .exchange()
+              .expectBody()
+              .returnResult()
+              .getResponseBody()
+          )
+        )
+      )
+        .getJSONObject("data")
+        .getString("id")
+    );
+  }
+
+  private String readFile(String path) throws IOException {
+    return new String(Files.readAllBytes(Paths.get(path)));
   }
 }

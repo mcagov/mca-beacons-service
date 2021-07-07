@@ -14,7 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.mca.beacons.api.gateways.BeaconGateway;
 import uk.gov.mca.beacons.api.gateways.EmergencyContactGateway;
-import uk.gov.mca.beacons.api.gateways.OwnerGateway;
+import uk.gov.mca.beacons.api.gateways.PersonGateway;
 import uk.gov.mca.beacons.api.gateways.UseGateway;
 import uk.gov.mca.beacons.api.jpa.entities.Beacon;
 import uk.gov.mca.beacons.api.jpa.entities.BeaconUse;
@@ -33,7 +33,7 @@ class GetBeaconsByAccountHolderIdServiceUnitTest {
   private UseGateway useGateway;
 
   @Mock
-  private OwnerGateway ownerGateway;
+  private PersonGateway personGateway;
 
   @Mock
   private EmergencyContactGateway emergencyContactGateway;
@@ -89,7 +89,7 @@ class GetBeaconsByAccountHolderIdServiceUnitTest {
 
     given(beaconGateway.findAllByAccountHolderId(accountId))
       .willReturn(Collections.singletonList(beacon));
-    given(ownerGateway.findByBeaconId(beaconId)).willReturn(owner);
+    given(personGateway.findByBeaconId(beaconId)).willReturn(owner);
 
     final var result = getBeaconsByAccountHolderIdService.execute(accountId);
     assertThat(result.get(0).getOwner(), is(owner));

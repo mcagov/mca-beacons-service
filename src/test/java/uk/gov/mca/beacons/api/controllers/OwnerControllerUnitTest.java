@@ -5,6 +5,7 @@ import static org.hamcrest.core.Is.is;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -24,11 +25,13 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.mca.beacons.api.WebMvcTestConfiguration;
+import uk.gov.mca.beacons.api.domain.PersonType;
 import uk.gov.mca.beacons.api.dto.BeaconPersonDTO;
 import uk.gov.mca.beacons.api.dto.WrapperDTO;
 import uk.gov.mca.beacons.api.jpa.entities.Person;
 import uk.gov.mca.beacons.api.mappers.BeaconPersonMapper;
 import uk.gov.mca.beacons.api.services.CreateOwnerService;
+import uk.gov.mca.beacons.api.services.GetPersonByIdService;
 
 @WebMvcTest(controllers = OwnerController.class)
 @AutoConfigureMockMvc
@@ -48,6 +51,9 @@ class OwnerControllerUnitTest {
   private CreateOwnerService createOwnerService;
 
   @MockBean
+  private GetPersonByIdService getPersonByIdService;
+
+  @MockBean
   private BeaconPersonMapper beaconPersonMapper;
 
   @BeforeEach
@@ -65,7 +71,7 @@ class OwnerControllerUnitTest {
         .writeValueAsString(newBeaconPersonDTO);
       mvc
         .perform(
-          post("/owner")
+          post("/owners")
             .contentType(MediaType.APPLICATION_JSON)
             .content(newBeaconPersonRequest)
         )
@@ -84,7 +90,7 @@ class OwnerControllerUnitTest {
 
       mvc
         .perform(
-          post("/owner")
+          post("/owners")
             .contentType(MediaType.APPLICATION_JSON)
             .content(createOwnerInvalidRequest)
         )
@@ -111,7 +117,7 @@ class OwnerControllerUnitTest {
         .writeValueAsString(newBeaconPersonDTO);
 
       mvc.perform(
-        post("/owner")
+        post("/owners")
           .contentType(MediaType.APPLICATION_JSON)
           .content(newBeaconPersonRequest)
       );
@@ -130,12 +136,68 @@ class OwnerControllerUnitTest {
         .willReturn(owner);
 
       mvc.perform(
-        post("/owner")
+        post("/owners")
           .contentType(MediaType.APPLICATION_JSON)
           .content(newBeaconPersonRequest)
       );
 
       verify(createOwnerService, times(1)).execute(owner);
+    }
+  }
+
+  @Nested
+  class RequestGetOwnerById {
+
+    private final UUID ownerId = UUID.fromString(
+      "8f427a4a-65a9-48f8-b603-e3ff5506ffed"
+    );
+    private final Person owner = Person.builder().id(ownerId).build();
+
+    @Test
+    void shouldRequestOwnerFromGetPersonByIdService() throws Exception {
+      given(getPersonByIdService.execute(ownerId, PersonType.OWNER))
+        .willReturn(owner);
+
+      mvc.perform(
+        get("/owners/" + ownerId).contentType(MediaType.APPLICATION_JSON)
+      );
+
+      verify(getPersonByIdService, times(1)).execute(ownerId, PersonType.OWNER);
+    }
+
+    @Test
+    void shouldReturn200WhenPersonIdFound() throws Exception {
+      given(getPersonByIdService.execute(ownerId, PersonType.OWNER))
+        .willReturn(owner);
+
+      mvc
+        .perform(
+          get("/owners/" + ownerId).contentType(MediaType.APPLICATION_JSON)
+        )
+        .andExpect(status().isOk());
+    }
+
+    @Test
+    void shouldMapOwnerToAWrapperDTO() throws Exception {
+      given(getPersonByIdService.execute(ownerId, PersonType.OWNER))
+        .willReturn(owner);
+
+      mvc.perform(
+        get("/owners/" + ownerId).contentType(MediaType.APPLICATION_JSON)
+      );
+
+      verify(beaconPersonMapper, times(1)).toWrapperDTO(owner);
+    }
+
+    @Test
+    void shouldReturn404IfOwnerNotFound() throws Exception {
+      given(getPersonByIdService.execute(ownerId)).willReturn(null);
+
+      mvc
+        .perform(
+          get("/owners/" + ownerId).contentType(MediaType.APPLICATION_JSON)
+        )
+        .andExpect(status().isNotFound());
     }
   }
 }

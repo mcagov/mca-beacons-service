@@ -190,7 +190,7 @@ class AccountHolderControllerUnitTest {
   class RequestGetAccountHolderById {
 
     @Test
-    void shouldRequestAccountHolderFromServiceByAuthId() throws Exception {
+    void shouldRequestAccountHolderFromServiceById() throws Exception {
       given(getAccountHolderByIdService.execute(accountHolderId))
         .willReturn(accountHolder);
 

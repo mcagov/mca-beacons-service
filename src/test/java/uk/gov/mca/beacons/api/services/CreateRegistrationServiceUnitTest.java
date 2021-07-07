@@ -22,7 +22,7 @@ import uk.gov.mca.beacons.api.domain.BeaconStatus;
 import uk.gov.mca.beacons.api.dto.CreateEmergencyContactRequest;
 import uk.gov.mca.beacons.api.dto.CreateOwnerRequest;
 import uk.gov.mca.beacons.api.gateways.EmergencyContactGateway;
-import uk.gov.mca.beacons.api.gateways.OwnerGateway;
+import uk.gov.mca.beacons.api.gateways.PersonGateway;
 import uk.gov.mca.beacons.api.jpa.BeaconJpaRepository;
 import uk.gov.mca.beacons.api.jpa.BeaconUseJpaRepository;
 import uk.gov.mca.beacons.api.jpa.entities.Beacon;
@@ -43,7 +43,7 @@ class CreateRegistrationServiceUnitTest {
   private BeaconUseJpaRepository beaconUseJpaRepository;
 
   @Mock
-  private OwnerGateway ownerGateway;
+  private PersonGateway personGateway;
 
   @Mock
   private EmergencyContactGateway emergencyContactGateway;
@@ -93,7 +93,7 @@ class CreateRegistrationServiceUnitTest {
 
     then(beaconJpaRepository).should(times(1)).save(beacon);
     then(beaconUseJpaRepository).should(times(1)).save(beaconUse);
-    then(ownerGateway).should(times(1)).save(isA(CreateOwnerRequest.class));
+    then(personGateway).should(times(1)).save(isA(CreateOwnerRequest.class));
     then(emergencyContactGateway)
       .should(times(1))
       .save(isA(CreateEmergencyContactRequest.class));
@@ -109,7 +109,7 @@ class CreateRegistrationServiceUnitTest {
     then(emergencyContactGateway)
       .should(times(4))
       .save(isA(CreateEmergencyContactRequest.class));
-    then(ownerGateway).should(times(2)).save(isA(CreateOwnerRequest.class));
+    then(personGateway).should(times(2)).save(isA(CreateOwnerRequest.class));
   }
 
   private void setupMultipleBeacons() {

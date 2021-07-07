@@ -10,7 +10,7 @@ import uk.gov.mca.beacons.api.domain.BeaconStatus;
 import uk.gov.mca.beacons.api.dto.CreateEmergencyContactRequest;
 import uk.gov.mca.beacons.api.dto.CreateOwnerRequest;
 import uk.gov.mca.beacons.api.gateways.EmergencyContactGateway;
-import uk.gov.mca.beacons.api.gateways.OwnerGateway;
+import uk.gov.mca.beacons.api.gateways.PersonGateway;
 import uk.gov.mca.beacons.api.jpa.BeaconJpaRepository;
 import uk.gov.mca.beacons.api.jpa.BeaconUseJpaRepository;
 import uk.gov.mca.beacons.api.jpa.entities.Beacon;
@@ -27,19 +27,19 @@ public class CreateRegistrationService {
 
   private final BeaconJpaRepository beaconJpaRepository;
   private final BeaconUseJpaRepository beaconUseJpaRepository;
-  private final OwnerGateway ownerGateway;
+  private final PersonGateway personGateway;
   private final EmergencyContactGateway emergencyContactGateway;
 
   @Autowired
   public CreateRegistrationService(
     BeaconJpaRepository beaconJpaRepository,
     BeaconUseJpaRepository beaconUseJpaRepository,
-    OwnerGateway ownerGateway,
+    PersonGateway personGateway,
     EmergencyContactGateway emergencyContactGateway
   ) {
     this.beaconJpaRepository = beaconJpaRepository;
     this.beaconUseJpaRepository = beaconUseJpaRepository;
-    this.ownerGateway = ownerGateway;
+    this.personGateway = personGateway;
     this.emergencyContactGateway = emergencyContactGateway;
   }
 
@@ -76,7 +76,7 @@ public class CreateRegistrationService {
       owner,
       beaconId
     );
-    ownerGateway.save(request);
+    personGateway.save(request);
   }
 
   private void registerEmergencyContacts(

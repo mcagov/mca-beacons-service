@@ -20,10 +20,10 @@ import uk.gov.mca.beacons.api.jpa.BeaconPersonJpaRepository;
 import uk.gov.mca.beacons.api.jpa.entities.Person;
 
 @ExtendWith(MockitoExtension.class)
-class OwnerGatewayImplUnitTest {
+class PersonGatewayImplUnitTest {
 
   @InjectMocks
-  private OwnerGatewayImpl ownerGateway;
+  private PersonGatewayImpl ownerGateway;
 
   @Mock
   private BeaconPersonJpaRepository beaconPersonRepository;

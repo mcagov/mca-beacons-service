@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.mca.beacons.api.gateways.BeaconGateway;
 import uk.gov.mca.beacons.api.gateways.EmergencyContactGateway;
-import uk.gov.mca.beacons.api.gateways.OwnerGateway;
+import uk.gov.mca.beacons.api.gateways.PersonGateway;
 import uk.gov.mca.beacons.api.gateways.UseGateway;
 import uk.gov.mca.beacons.api.jpa.entities.Beacon;
 import uk.gov.mca.beacons.api.jpa.entities.BeaconUse;
@@ -19,19 +19,19 @@ public class GetBeaconsByAccountHolderIdService {
 
   private final BeaconGateway beaconGateway;
   private final UseGateway useGateway;
-  private final OwnerGateway ownerGateway;
+  private final PersonGateway personGateway;
   private final EmergencyContactGateway emergencyContactGateway;
 
   @Autowired
   public GetBeaconsByAccountHolderIdService(
     BeaconGateway beaconGateway,
     UseGateway useGateway,
-    OwnerGateway ownerGateway,
+    PersonGateway personGateway,
     EmergencyContactGateway emergencyContactGateway
   ) {
     this.beaconGateway = beaconGateway;
     this.useGateway = useGateway;
-    this.ownerGateway = ownerGateway;
+    this.personGateway = personGateway;
     this.emergencyContactGateway = emergencyContactGateway;
   }
 
@@ -47,7 +47,7 @@ public class GetBeaconsByAccountHolderIdService {
         final List<BeaconUse> uses = useGateway.findAllByBeaconId(beaconId);
         beacon.setUses(uses);
 
-        final Person owner = ownerGateway.findByBeaconId(beaconId);
+        final Person owner = personGateway.findByBeaconId(beaconId);
         beacon.setOwner(owner);
 
         final List<Person> emergencyContacts = emergencyContactGateway.findAllByBeaconId(
