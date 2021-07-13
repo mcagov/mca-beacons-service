@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -75,48 +76,102 @@ class CreateRegistrationServiceUnitTest {
     given(beaconJpaRepository.save(beacon)).willReturn(beacon);
   }
 
-  @Test
-  void shouldSetTheBeaconStatusToNew() {
-    createRegistrationService.register(registration);
-    assertThat(beacon.getBeaconStatus(), is(BeaconStatus.NEW));
+  @Nested
+  class SingleBeacon {
+
+    @Test
+    void shouldSetTheBeaconStatusToNew() {
+      createRegistrationService.register(registration);
+
+      assertThat(beacon.getBeaconStatus(), is(BeaconStatus.NEW));
+    }
+
+    @Test
+    void shouldSetTheBeaconIdOnTheUse() {
+      createRegistrationService.register(registration);
+
+      assertThat(beaconUse.getBeaconId(), is(beaconId));
+    }
+
+    @Test
+    void shouldRegisterASingleBeacon() {
+      createRegistrationService.register(registration);
+
+      then(beaconJpaRepository).should(times(1)).save(beacon);
+      then(beaconUseJpaRepository).should(times(1)).save(beaconUse);
+    }
+
+    @Test
+    void shouldRegisterTheUseOfASingleBeacon() {
+      createRegistrationService.register(registration);
+
+      then(beaconUseJpaRepository).should(times(1)).save(beaconUse);
+    }
+
+    @Test
+    void shouldCreateANewOwnerIfNecessary() {
+      createRegistrationService.register(registration);
+
+      then(ownerGateway).should(times(1)).save(isA(CreateOwnerRequest.class));
+    }
+
+    @Test
+    void shouldCreateANewEmergencyContactIfNecessary() {
+      createRegistrationService.register(registration);
+
+      then(emergencyContactGateway)
+        .should(times(1))
+        .save(isA(CreateEmergencyContactRequest.class));
+    }
   }
 
-  @Test
-  void shouldSetTheBeaconIdOnTheUse() {
-    createRegistrationService.register(registration);
-    assertThat(beaconUse.getBeaconId(), is(beaconId));
-  }
+  @Nested
+  class MultipleBeacons {
 
-  @Test
-  void shouldRegisterASingleBeacon() {
-    createRegistrationService.register(registration);
+    @Test
+    void shouldRegisterTwoBeacons() {
+      setupTwoBeacons();
 
-    then(beaconJpaRepository).should(times(1)).save(beacon);
-    then(beaconUseJpaRepository).should(times(1)).save(beaconUse);
-    then(ownerGateway).should(times(1)).save(isA(CreateOwnerRequest.class));
-    then(emergencyContactGateway)
-      .should(times(1))
-      .save(isA(CreateEmergencyContactRequest.class));
-  }
+      createRegistrationService.register(registration);
 
-  @Test
-  void shouldRegisterAMultipleBeaconsUsesAndEmergencyContacts() {
-    setupMultipleBeacons();
-    createRegistrationService.register(registration);
+      then(beaconJpaRepository).should(times(2)).save(beacon);
+    }
 
-    then(beaconJpaRepository).should(times(2)).save(beacon);
-    then(beaconUseJpaRepository).should(times(4)).save(beaconUse);
-    then(emergencyContactGateway)
-      .should(times(4))
-      .save(isA(CreateEmergencyContactRequest.class));
-    then(ownerGateway).should(times(2)).save(isA(CreateOwnerRequest.class));
-  }
+    @Test
+    void shouldRegisterTwoBeaconsWithTwoUsesEach() {
+      setupTwoBeacons();
 
-  private void setupMultipleBeacons() {
-    beacon.setUses(Arrays.asList(beaconUse, beaconUse));
-    beacon.setEmergencyContacts(
-      Arrays.asList(emergencyContact, emergencyContact)
-    );
-    registration.setBeacons(Arrays.asList(beacon, beacon));
+      createRegistrationService.register(registration);
+
+      then(beaconUseJpaRepository).should(times(4)).save(beaconUse);
+    }
+
+    @Test
+    void shouldRegisterTwoBeaconsWithTwoEmergencyContactsEach() {
+      setupTwoBeacons();
+
+      createRegistrationService.register(registration);
+
+      then(emergencyContactGateway)
+        .should(times(4))
+        .save(isA(CreateEmergencyContactRequest.class));
+    }
+
+    @Test
+    void shouldCreateTwoNewOwnersForEachBeacon() {
+      setupTwoBeacons();
+
+      createRegistrationService.register(registration);
+
+      then(ownerGateway).should(times(2)).save(isA(CreateOwnerRequest.class));
+    }
+
+    private void setupTwoBeacons() {
+      beacon.setUses(Arrays.asList(beaconUse, beaconUse));
+      beacon.setEmergencyContacts(
+        Arrays.asList(emergencyContact, emergencyContact)
+      );
+      registration.setBeacons(Arrays.asList(beacon, beacon));
+    }
   }
 }

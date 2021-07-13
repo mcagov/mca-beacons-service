@@ -12,6 +12,7 @@ public class CreateEmergencyContactRequestMapper {
     final var now = LocalDateTime.now();
     final Person emergencyContact = new Person();
     emergencyContact.setBeaconId(request.getBeaconId());
+    emergencyContact.setAccountHolderId(request.getAccountHolderId());
     emergencyContact.setCreatedDate(now);
     emergencyContact.setLastModifiedDate(now);
     emergencyContact.setFullName(request.getFullName());
@@ -39,6 +40,7 @@ public class CreateEmergencyContactRequestMapper {
     return CreateEmergencyContactRequest
       .builder()
       .beaconId(beaconId)
+      .accountHolderId(emergencyContact.getAccountHolderId())
       .fullName(emergencyContact.getFullName())
       .telephoneNumber(emergencyContact.getTelephoneNumber())
       .alternativeTelephoneNumber(

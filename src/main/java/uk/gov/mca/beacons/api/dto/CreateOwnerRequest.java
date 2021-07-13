@@ -12,6 +12,7 @@ import lombok.Setter;
 public class CreateOwnerRequest {
 
   private UUID beaconId;
+  private UUID accountHolderId;
   private String fullName;
   private LocalDateTime createdDate;
   private LocalDateTime lastModifiedDate;

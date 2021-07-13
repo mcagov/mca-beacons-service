@@ -23,6 +23,8 @@ public class Person {
 
   private UUID beaconId;
 
+  private UUID accountHolderId;
+
   private String fullName;
 
   private String telephoneNumber;

@@ -34,6 +34,7 @@ class EmergencyContactGatewayImplUnitTest {
   @Test
   void shouldCreateAnEmergencyContactFromRequestObject() {
     final UUID beaconId = UUID.randomUUID();
+    final UUID accountHolderId = UUID.randomUUID();
     final String fullName = "Souma Matveev";
     final String telephoneNumber = "07777777777";
     final String alternativeTelephoneNumber = "02088888888";
@@ -48,6 +49,7 @@ class EmergencyContactGatewayImplUnitTest {
     final CreateEmergencyContactRequest createEmergencyContactRequest = CreateEmergencyContactRequest
       .builder()
       .beaconId(beaconId)
+      .accountHolderId(accountHolderId)
       .fullName(fullName)
       .telephoneNumber(telephoneNumber)
       .alternativeTelephoneNumber(alternativeTelephoneNumber)
@@ -67,6 +69,7 @@ class EmergencyContactGatewayImplUnitTest {
     final Person emergencyContact = emergencyContactCaptor.getValue();
 
     assertThat(emergencyContact.getBeaconId(), is(beaconId));
+    assertThat(emergencyContact.getAccountHolderId(), is(accountHolderId));
     assertThat(emergencyContact.getFullName(), is(fullName));
     assertThat(emergencyContact.getTelephoneNumber(), is(telephoneNumber));
     assertThat(

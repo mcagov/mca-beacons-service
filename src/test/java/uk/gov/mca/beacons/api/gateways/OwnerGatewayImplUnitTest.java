@@ -34,6 +34,7 @@ class OwnerGatewayImplUnitTest {
   @Test
   void shouldCreateAnOwnerFromRequestObject() {
     final UUID beaconId = UUID.randomUUID();
+    final UUID accountHolderId = UUID.randomUUID();
     final String fullName = "Souma Matveev";
     final String telephoneNumber = "07777777777";
     final String alternativeTelephoneNumber = "02088888888";
@@ -48,6 +49,7 @@ class OwnerGatewayImplUnitTest {
     final CreateOwnerRequest createOwnerRequest = CreateOwnerRequest
       .builder()
       .beaconId(beaconId)
+      .accountHolderId(accountHolderId)
       .fullName(fullName)
       .telephoneNumber(telephoneNumber)
       .alternativeTelephoneNumber(alternativeTelephoneNumber)
@@ -67,6 +69,7 @@ class OwnerGatewayImplUnitTest {
     final Person owner = ownerCaptor.getValue();
 
     assertThat(owner.getBeaconId(), is(beaconId));
+    assertThat(owner.getAccountHolderId(), is(accountHolderId));
     assertThat(owner.getFullName(), is(fullName));
     assertThat(owner.getTelephoneNumber(), is(telephoneNumber));
     assertThat(

@@ -12,6 +12,7 @@ public class CreateOwnerRequestMapper {
     final var now = LocalDateTime.now();
     final Person owner = new Person();
     owner.setBeaconId(request.getBeaconId());
+    owner.setAccountHolderId(request.getAccountHolderId());
     owner.setFullName(request.getFullName());
     owner.setCreatedDate(
       request.getCreatedDate() != null ? request.getCreatedDate() : now
@@ -58,6 +59,7 @@ public class CreateOwnerRequestMapper {
     return CreateOwnerRequest
       .builder()
       .beaconId(beaconId)
+      .accountHolderId(owner.getAccountHolderId())
       .fullName(owner.getFullName())
       .createdDate(owner.getCreatedDate())
       .lastModifiedDate(owner.getLastModifiedDate())
